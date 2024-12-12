@@ -159,12 +159,12 @@ footer {
     border-radius: 10px;
     display: flex;
     flex-direction: column;
-    max-height: 500px;
+    max-height: 345px;
 }
 
 .debuff-list {
     flex: 1;
-    overflow-y: auto;
+    overflow-y: visible;
     padding: 5px;
     display: flex;
     flex-direction: column;
@@ -202,7 +202,6 @@ footer {
     padding: 5px 8px;
     border-radius: 5px;
     font-size: 12px;
-    z-index: 99999;
     width: 200px;
     box-sizing: border-box;
     border: 2px solid #111;
@@ -250,4 +249,66 @@ footer {
     grid-row: 2 / 3;
     text-align: center;
     font-size: 20px;
+}
+
+.particle-container {
+    position: fixed;
+    pointer-events: none;
+    z-index: 9999;
+    width: 100%;
+    height: 100%;
+    left: 0;
+    top: 0;
+}
+
+.particle {
+    position: absolute;
+    font-size: 32px;
+    pointer-events: none;
+    transform: translate(-50%, -50%);
+    animation: particle-animation 1.2s cubic-bezier(0.21, 0.98, 0.6, 0.99) forwards;
+}
+
+@keyframes particle-animation {
+    0% {
+        transform: translate(-50%, -50%) scale(1);
+        opacity: 1;
+    }
+    100% {
+        transform: translate(
+                calc(-50% + var(--endX)),
+                calc(-50% + var(--endY))
+        ) scale(2);
+        opacity: 0;
+    }
+}
+
+.hate-indicator {
+    position: absolute;
+    font-size: 24px;
+    font-weight: bold;
+    pointer-events: none;
+    transform: translate(-50%, -50%);
+    animation: hate-indicator-animation 1s ease-out forwards;
+    text-shadow: 0 0 5px #000;
+}
+
+.hate-indicator.positive {
+    color: #0f0;
+}
+
+.hate-indicator.negative {
+    color: #f00;
+}
+
+
+@keyframes hate-indicator-animation {
+    0% {
+        transform: translate(-50%, -50%) scale(0.5);
+        opacity: 1;
+    }
+    100% {
+        transform: translate(-50%, calc(-50% - 50px)) scale(1);
+        opacity: 0;
+    }
 }

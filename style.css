@@ -29,6 +29,23 @@ body {
     text-align: center;
     font-weight: bold;
     border: 2px solid #0ff;
+    position: relative;
+    overflow: hidden; /* For the progress bar */
+}
+
+.player-level-progress {
+    position: absolute;
+    top: 0;
+    left: 0;
+    height: 100%;
+    background: rgba(0, 255, 255, 0.1);
+    transition: width 0.3s ease;
+    z-index: 0;
+}
+
+.player-level-text {
+    position: relative;
+    z-index: 1;
 }
 
 .content-area {
@@ -311,4 +328,78 @@ footer {
         transform: translate(-50%, calc(-50% - 50px)) scale(1);
         opacity: 0;
     }
+}
+
+@media screen and (max-width: 768px) {
+    .game-wrapper {
+        min-width: unset;
+        width: 100%;
+        padding: 10px;
+        box-sizing: border-box;
+    }
+
+    .game-container {
+        width: 100%;
+    }
+
+    .player-level-bar {
+        min-width: unset;
+        width: calc(100% - 20px); /* Account for padding */
+        max-width: 400px; /* Limit maximum width */
+    }
+
+    .content-area {
+        flex-direction: column;
+        align-items: center;
+    }
+
+    .debuff-container {
+        flex-direction: row;
+        width: 100%;
+        max-height: unset;
+    }
+
+    .debuff:active {
+        transform: scale(0.95);
+        opacity: 0.8;
+    }
+
+    .debuff-list {
+        flex-direction: row;
+        flex-wrap: wrap;
+        justify-content: center;
+    }
+
+    .tooltip-panel {
+        display: none !important; /* Hide tooltips on mobile */
+    }
+
+    .toolbar {
+        gap: 5px;
+    }
+
+    .tool-btn {
+        width: 40px;
+        height: 40px;
+        font-size: 20px;
+    }
+
+    .tomato-emoji {
+        font-size: 80px;
+    }
+}
+
+.combo-indicator {
+    color: #ff0;
+    font-weight: bold;
+    animation: combo-pulse 0.5s infinite;
+}
+
+.combo-bonus {
+    color: #0f0;
+}
+
+@keyframes combo-pulse {
+    0%, 100% { transform: scale(1); }
+    50% { transform: scale(1.1); }
 }

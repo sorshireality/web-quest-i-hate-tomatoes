@@ -52,7 +52,6 @@ class Debuff {
 }
 
 
-
 class TomatoGame {
     constructor() {
         this.JAIL_DURATION = 5000;
@@ -69,17 +68,17 @@ class TomatoGame {
         };
 
         this.RESPECT_MILESTONES = [
-            { hate: -150, respect: 0 },
-            { hate: -50, respect: 1 },
-            { hate: 0, respect: 2 },
-            { hate: 50, respect: 3 },
-            { hate: 100, respect: 4 },
-            { hate: 150, respect: 5 },
-            { hate: 200, respect: 6 },
-            { hate: 500, respect: 7 },
-            { hate: 1000, respect: 8 },
-            { hate: 5000, respect: 9 },
-            { hate: Infinity, respect: 10 },
+            {hate: -150, respect: 0},
+            {hate: -50, respect: 1},
+            {hate: 0, respect: 2},
+            {hate: 50, respect: 3},
+            {hate: 100, respect: 4},
+            {hate: 150, respect: 5},
+            {hate: 200, respect: 6},
+            {hate: 500, respect: 7},
+            {hate: 1000, respect: 8},
+            {hate: 5000, respect: 9},
+            {hate: Infinity, respect: 10},
         ];
 
         this.hateLevel = 0;
@@ -115,6 +114,12 @@ class TomatoGame {
         this.particleContainer.className = 'particle-container';
         document.querySelector('main').appendChild(this.particleContainer);
 
+        this.COMBOS = {
+            'jail+ketchup': 10,
+            'ketchup+peel': 5,
+            'jail+ketchup+peel': 20,
+            'jail+peel': 8
+        };
 
         this.init();
     }
@@ -123,6 +128,32 @@ class TomatoGame {
         this.bindEventListeners();
         this.updateLevels();
         this.updateUI();
+    }
+
+    showComboIndicator(comboName, bonusValue) {
+        const comboText = document.createElement('div');
+        comboText.className = 'combo-indicator';
+        comboText.innerHTML = `COMBO! ${comboName} <span class="combo-bonus">+${bonusValue}</span>`;
+
+        this.notificationBar.innerHTML = '';
+        this.notificationBar.appendChild(comboText);
+    }
+
+    calculateComboBonus() {
+        let activeDebuffs = [];
+        if (this.jailActive) activeDebuffs.push('jail');
+        if (this.debuffs.ketchup.length > 0) activeDebuffs.push('ketchup');
+        if (this.debuffs.peel.length > 0) activeDebuffs.push('peel');
+
+        // Sort to match combo key format
+        activeDebuffs.sort();
+        const comboKey = activeDebuffs.join('+');
+
+        if (this.COMBOS[comboKey]) {
+            this.showComboIndicator(comboKey.toUpperCase(), this.COMBOS[comboKey]);
+        }
+
+        return this.COMBOS[comboKey] || 0;
     }
 
     createParticle(x, y, emoji) {
@@ -207,16 +238,23 @@ class TomatoGame {
     }
 
     getEmojiForTool(action) {
-        switch(action) {
-            case 'punch': return '👊';
-            case 'jail': return '🔒';
-            case 'buy': return '💲';
-            case 'ketchup': return '🥫';
-            case 'pet': return '🤚';
-            case 'peel': return '🔪';
+        switch (action) {
+            case 'punch':
+                return '👊';
+            case 'jail':
+                return '🔒';
+            case 'buy':
+                return '💲';
+            case 'ketchup':
+                return '🥫';
+            case 'pet':
+                return '🤚';
+            case 'peel':
+                return '🔪';
         }
         return '❌';
     }
+
     handleTomatoClick() {
         if (!this.selectedTool) return;
         if (this.jailActive && this.selectedTool !== 'punch') return;
@@ -240,11 +278,12 @@ class TomatoGame {
     calculateHateChange(action) {
         const ketchupPlus = this.debuffs.ketchup.length;
         const peelPlus = this.debuffs.peel.length * 2; // peelPlus is now based on peel debuffs count
+        const comboBonus = this.calculateComboBonus();
         let base = 0;
 
         switch (action) {
             case 'punch':
-                let punchBase = 1;
+                let punchBase = 100;
                 if (this.jailActive) punchBase += 1;
                 if (this.punchBuffActive) punchBase += 1;
                 base = punchBase + ketchupPlus + peelPlus;
@@ -269,7 +308,7 @@ class TomatoGame {
                 this.addDebuff('peel', this.PEEL_DURATION);
                 break;
         }
-        return base;
+        return base + comboBonus;
     }
 
     setJail(state, duration) {
@@ -389,7 +428,6 @@ class TomatoGame {
     }
 
 
-
     updateLevels() {
         let respectLevel = 0;
         for (const milestone of this.RESPECT_MILESTONES) {
@@ -453,13 +491,19 @@ class TomatoGame {
     }
 
     toolName(action) {
-        switch(action) {
-            case 'punch': return "Punch";
-            case 'jail': return "Jail";
-            case 'buy': return "Buy";
-            case 'ketchup': return "Ketchup";
-            case 'pet': return "Pet";
-            case 'peel': return "Peel";
+        switch (action) {
+            case 'punch':
+                return "Punch";
+            case 'jail':
+                return "Jail";
+            case 'buy':
+                return "Buy";
+            case 'ketchup':
+                return "Ketchup";
+            case 'pet':
+                return "Pet";
+            case 'peel':
+                return "Peel";
         }
         return "";
     }
@@ -467,21 +511,42 @@ class TomatoGame {
 
     updatePlayerLevelBar() {
         const levelInfo = this.getPlayerLevelText(this.hateLevel);
-        this.playerLevelBar.textContent = levelInfo.emoji + " " + levelInfo.text;
+
+        // Find current milestone and next milestone
+        let currentMilestone = this.RESPECT_MILESTONES.find(m => m.hate > this.hateLevel);
+        let prevMilestone = this.RESPECT_MILESTONES[this.RESPECT_MILESTONES.indexOf(currentMilestone) - 1];
+
+        this.playerLevelBar.innerHTML = '';
+        const textSpan = document.createElement('span');
+        textSpan.className = 'player-level-text';
+        textSpan.textContent = levelInfo.emoji + " " + levelInfo.text;
+        this.playerLevelBar.appendChild(textSpan);
+
+        // Calculate progress percentage
+        if (this.hateLevel < 0) return;
+        let progress = ((this.hateLevel - prevMilestone.hate) / (currentMilestone.hate - prevMilestone.hate)) * 100;
+
+        // Update DOM
+        const progressBar = document.createElement('div');
+        progressBar.className = 'player-level-progress';
+        progressBar.style.width = `${progress}%`;
+        this.playerLevelBar.appendChild(progressBar);
     }
 
     getPlayerLevelText(h) {
-        if (h < -150) return { text: "Below Bottom", emoji: "🕳" };
-        if (h < -50) return { text: "Negative vibes", emoji: "🕊" };
-        if (h < 0) return { text: "I hate you now", emoji: "😡" };
-        if (h < 50) return { text: "Not a hater", emoji: "😊" };
-        if (h < 100) return { text: "Low", emoji: "😐" };
-        if (h < 150) return { text: "Mild Hater", emoji: "🤔" };
-        if (h < 200) return { text: "Hater", emoji: "😠" };
-        if (h < 500) return { text: "Serious Hater", emoji: "🔥" };
-        if (h < 1000) return { text: "Hardcore Hater", emoji: "💀" };
-        if (h < 5000) return { text: "Insane Hater", emoji: "👿" };
-        return { text: "Awesome Hater", emoji: "🦾" };
+        if (h < -500) return {text: "It's over", emoji: "💔"};
+        if (h < -300) return {text: "Stop it", emoji: "💀"};
+        if (h < -150) return {text: "Below Bottom", emoji: "🕳"};
+        if (h < -50) return {text: "Negative vibes", emoji: "🕊"};
+        if (h < 0) return {text: "I hate you now", emoji: "😡"};
+        if (h < 50) return {text: "Hidden hater", emoji: "😊"};
+        if (h < 100) return {text: "Maybe hater", emoji: "😑"};
+        if (h < 150) return {text: "You feel that hate", emoji: "🔥"};
+        if (h < 200) return {text: "Kaneki--tomato-hater", emoji: "😎"};
+        if (h < 500) return {text: "Hitler for Tomatoes", emoji: "🥸"};
+        if (h < 1000) return {text: "God bless you", emoji: "🙏"};
+        if (h < 5000) return {text: "Unstoppable tomato hater", emoji: "👿"};
+        return {text: "Lord anti-pomidor", emoji: "🤴"};
     }
 
     renderDebuffs() {

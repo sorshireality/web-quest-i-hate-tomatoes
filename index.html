@@ -1,0 +1,58 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+    <title>I hate Tomatos</title>
+    <link rel="stylesheet" href="style.css"/>
+</head>
+<body>
+<div class="game-wrapper">
+    <div class="player-level-bar" id="playerLevelBar"></div>
+    <div class="content-area">
+        <div class="game-container">
+            <header>
+                <div class="levels">
+                    <div class="level">
+                        <span>Hate Level:</span>
+                        <span id="hateLevel">0</span>
+                    </div>
+                    <div class="level">
+                        <span>Respect Level:</span>
+                        <span id="respectLevel">0</span>
+                    </div>
+                </div>
+            </header>
+
+            <div class="notification-bar" id="notificationBar">
+                Please select a tool below.
+            </div>
+
+            <main>
+                <div class="tomato-container">
+                    <div class="tomato-emoji" id="tomato" draggable="false">🍅</div>
+                </div>
+
+                <div class="toolbar">
+                    <button class="tool-btn" data-action="punch" title="Punch the Tomato">👊</button>
+                    <button class="tool-btn locked" data-action="jail" title="Put Tomato in Jail">🔒</button>
+                    <button class="tool-btn locked" data-action="buy" title="Buy (reduce hate)">💲</button>
+                    <button class="tool-btn locked" data-action="ketchup" title="Ketchup Attack">🥫</button>
+                    <button class="tool-btn locked" data-action="pet" title="Pet the Tomato">🤚</button>
+                    <button class="tool-btn locked" data-action="peel" title="Peel the Tomato">🔪</button>
+                </div>
+            </main>
+
+            <footer>
+                <p>Made by Sorshy for "I hate Tomatos" quest</p>
+            </footer>
+        </div>
+
+        <div class="debuff-container">
+            <div class="debuff-list" id="debuffBar"></div>
+        </div>
+    </div>
+</div>
+<script src="script.js"></script>
+</body>
+</html>
